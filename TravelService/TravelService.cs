@@ -11,6 +11,7 @@ using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using Microsoft.ServiceFabric.Data;
+using TravelService.Repositories;
 
 namespace TravelService
 {
@@ -40,7 +41,9 @@ namespace TravelService
 
                         builder.Services
                                     .AddSingleton<StatefulServiceContext>(serviceContext)
-                                    .AddSingleton<IReliableStateManager>(this.StateManager);
+                                    .AddSingleton<IReliableStateManager>(this.StateManager)
+                                    .AddScoped<ITravelRepository,TravelRepository>();
+
                         builder.WebHost
                                     .UseKestrel()
                                     .UseContentRoot(Directory.GetCurrentDirectory())

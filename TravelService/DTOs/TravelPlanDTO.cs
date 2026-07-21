@@ -11,7 +11,7 @@
         public decimal Budget { get; set; }
         public string GeneralNotes { get; set; } = string.Empty;
 
-        public List<DestinationDto> Destinations { get; set; } = new List<DestinationDto>();
-        public List<ActivityDto> Activities { get; set; } = new List<ActivityDto>();
+        public List<DestinationDTO> Destinations { get; set; } = new List<DestinationDTO>();
+        public List<ActivityDTO> Activities { get; set; } = new List<ActivityDTO>();
     }
 }

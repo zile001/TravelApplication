@@ -11,6 +11,8 @@ using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using Microsoft.ServiceFabric.Data;
+using FinanceService.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinanceService
 {
@@ -38,7 +40,11 @@ namespace FinanceService
 
                         var builder = WebApplication.CreateBuilder();
 
+                        var connectionString = builder.Configuration.GetConnectionString("FinanceDbConnection");
+                        builder.Services.AddDbContext<FinanceDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("FinanceDbConnection")));
+
                         builder.Services.AddSingleton<StatelessServiceContext>(serviceContext);
+                        builder.Services.AddScoped<IFinanceRepository,FinanceRepository>();
                         builder.WebHost
                                     .UseKestrel()
                                     .UseContentRoot(Directory.GetCurrentDirectory())
@@ -53,6 +59,7 @@ namespace FinanceService
                         app.UseSwagger();
                         app.UseSwaggerUI();
                         }
+                        app.UseRouting();
                         app.UseAuthorization();
                         app.MapControllers();
                         

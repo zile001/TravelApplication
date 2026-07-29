@@ -92,17 +92,16 @@ namespace TravelService.Controllers
             return Ok(new { Message = "Plan putovanja i svi podaci su obrisani." });
         }
 
+        [HttpGet("plans/{planId}/destinations")]
+        public async Task<IActionResult> GetDestinations(Guid planId)
+        {
+            var destinations = await _travelRepository.GetDestinationsByPlanIdAsync(planId);
+            return Ok(destinations);
+        }
+
         [HttpPost("plans/{planId}/destinations")]
         public async Task<IActionResult> AddDestination(Guid planId, [FromBody] CreateDestinationDTO dto)
         {
-            var plan = await _travelRepository.GetPlanByIdAsync(planId);
-            if (plan == null) return NotFound(new { Message = "Plan putovanja nije pronadjen" });
-
-            if(dto.ArrivalDate < plan.StartDate || dto.DepartureDate > plan.EndDate)
-            {
-                return BadRequest(new { Message = "Datumi destinacije moraju biti unutar opsega trajanja putovanja" });
-            }
-
             var newDestination = new Destination
             {
                 Id = Guid.NewGuid(),
@@ -113,8 +112,114 @@ namespace TravelService.Controllers
                 Notes = dto.Notes
             };
 
-            await _travelRepository.AddDestinationAsync(planId,newDestination);
-            return Ok(new { Message = "Destinacija uspesno dodata u plan" });
+            var uspesno = await _travelRepository.AddDestinationAsync(planId, newDestination);
+            if (!uspesno) return NotFound(new { Message = "Plan putovanja nije pronađen" });
+
+            return Ok(newDestination);
+        }
+
+        [HttpPut("plans/{planId}/destinations/{destinationId}")]
+        public async Task<IActionResult> UpdateDestination(Guid planId, Guid destinationId, [FromBody] CreateDestinationDTO dto)
+        {
+            var destination = new Destination
+            {
+                Id = destinationId,
+                Name = dto.Name,
+                Location = dto.Location,
+                ArrivalDate = dto.ArrivalDate,
+                DepartureDate = dto.DepartureDate,
+                Notes = dto.Notes
+            };
+
+            var uspesno = await _travelRepository.UpdateDestinationAsync(planId, destination);
+            if (!uspesno) return NotFound(new { Message = "Plan ili destinacija nisu pronađeni" });
+
+            return Ok(destination);
+        }
+
+        [HttpDelete("plans/{planId}/destinations/{destinationId}")]
+        public async Task<IActionResult> DeleteDestination(Guid planId, Guid destinationId)
+        {
+            var uspesno = await _travelRepository.DeleteDestinationAsync(planId, destinationId);
+            if (!uspesno) return NotFound(new { Message = "Plan ili destinacija nisu pronađeni" });
+
+            return Ok(new { Message = "Destinacija je uspešno obrisana" });
+        }
+
+        [HttpGet("plans/{planId}/activities")]
+        public async Task<IActionResult> GetActivities(Guid planId)
+        {
+            var activities = await _travelRepository.GetActivitiesByPlanIdAsync(planId);
+            var dtos = activities.Select(MapActivityToDto);
+            return Ok(dtos);
+        }
+
+        [HttpPost("plans/{planId}/activities")]
+        public async Task<IActionResult> AddActivity(Guid planId, [FromBody] CreateActivityDTO dto)
+        {
+            Enum.TryParse<ActivityStatus>(dto.Status, true, out var parsedStatus);
+            var newActivity = new Activity
+            {
+                Id = Guid.NewGuid(),
+                Title = dto.Title,
+                Date = dto.Date,
+                Time = dto.Time,
+                Location = dto.Location,
+                Description = dto.Description,
+                EstimatedCost = dto.EstimatedCost,
+                Status = parsedStatus
+            };
+
+            var uspesno = await _travelRepository.AddActivityAsync(planId, newActivity);
+            if (!uspesno) return NotFound(new { Message = "Plan putovanja nije pronađen" });
+
+            return Ok(MapActivityToDto(newActivity));
+        }
+
+        [HttpPut("plans/{planId}/activities/{activityId}")]
+        public async Task<IActionResult> UpdateActivity(Guid planId, Guid activityId, [FromBody] CreateActivityDTO dto)
+        {
+            Enum.TryParse<ActivityStatus>(dto.Status, true, out var parsedStatus);
+            var activity = new Activity
+            {
+                Id = activityId,
+                Title = dto.Title,
+                Date = dto.Date,
+                Time = dto.Time,
+                Location = dto.Location,
+                Description = dto.Description,
+                EstimatedCost = dto.EstimatedCost,
+                Status = parsedStatus
+            };
+
+            var uspesno = await _travelRepository.UpdateActivityAsync(planId, activity);
+            if (!uspesno) return NotFound(new { Message = "Plan ili aktivnost nisu pronađeni" });
+
+            return Ok(MapActivityToDto(activity));
+        }
+
+        [HttpDelete("plans/{planId}/activities/{activityId}")]
+        public async Task<IActionResult> DeleteActivity(Guid planId, Guid activityId)
+        {
+            var uspesno = await _travelRepository.DeleteActivityAsync(planId, activityId);
+            if (!uspesno) return NotFound(new { Message = "Plan ili aktivnost nisu pronađeni" });
+
+            return Ok(new { Message = "Aktivnost uspešno obrisana" });
+        }
+
+        private static ActivityDTO MapActivityToDto(Activity activity)
+        {
+            return new ActivityDTO
+            {
+                Id = activity.Id,
+                Title = activity.Title,
+                Date = activity.Date,
+                Time = activity.Time,
+                Location = activity.Location,
+                Description = activity.Description,
+                EstimatedCost = activity.EstimatedCost,
+                Status = activity.Status.ToString()
+            };
         }
 
         private static TravelPlanDTO MapToPlanDto(TravelPlan plan)
@@ -147,7 +252,7 @@ namespace TravelService.Controllers
                     Location = a.Location,
                     Description = a.Description,
                     EstimatedCost = a.EstimatedCost,
-                    Status = a.Status
+                    Status = a.Status.ToString(),
                 }).ToList()
             };
         }

@@ -41,6 +41,16 @@ namespace ApiGateway
 
                         var builder = WebApplication.CreateBuilder();
 
+                        builder.Services.AddCors(options =>
+                        {
+                            options.AddPolicy("AllowReactApp", policy =>
+                            {
+                                policy.WithOrigins("http://localhost:3000", "http://localhost:5173")
+                                      .AllowAnyHeader()
+                                      .AllowAnyMethod();
+                            });
+                        });
+
                         builder.Services.AddSingleton<StatelessServiceContext>(serviceContext);
 
                         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -95,6 +105,7 @@ namespace ApiGateway
                         app.UseRouting();
                         app.UseAuthentication();
                         app.UseAuthorization();
+                        app.UseCors("AllowReactApp");
                         app.MapReverseProxy();
 
                         app.MapControllers();

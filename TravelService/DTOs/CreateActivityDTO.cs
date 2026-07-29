@@ -22,6 +22,6 @@ namespace TravelService.DTOs
         [Range(0, double.MaxValue, ErrorMessage = "Procijenjeni trošak ne može biti negativan.")]
         public decimal EstimatedCost { get; set; }
 
-        public ActivityStatus Status { get; set; } = ActivityStatus.Planirano;
+        public string Status { get; set; } = string.Empty;
     }
 }

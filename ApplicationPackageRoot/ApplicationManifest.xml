@@ -20,9 +20,6 @@
     <EnvironmentOverrides CodePackageRef="code">
       <EnvironmentVariable Name="ASPNETCORE_ENVIRONMENT" Value="[TravelService_ASPNETCORE_ENVIRONMENT]" />
     </EnvironmentOverrides>
-    <Policies>
-      <EndpointBindingPolicy EndpointRef="ServiceEndpoint" />
-    </Policies>
   </ServiceManifestImport>
   <ServiceManifestImport>
     <ServiceManifestRef ServiceManifestName="ChecklistServicePkg" ServiceManifestVersion="1.0.0" />
@@ -37,9 +34,6 @@
     <EnvironmentOverrides CodePackageRef="code">
       <EnvironmentVariable Name="ASPNETCORE_ENVIRONMENT" Value="[FinanceService_ASPNETCORE_ENVIRONMENT]" />
     </EnvironmentOverrides>
-    <Policies>
-      <EndpointBindingPolicy EndpointRef="ServiceEndpoint" />
-    </Policies>
   </ServiceManifestImport>
   <ServiceManifestImport>
     <ServiceManifestRef ServiceManifestName="AuthServicePkg" ServiceManifestVersion="1.0.0" />

@@ -11,6 +11,8 @@ using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using Microsoft.ServiceFabric.Data;
+using ChecklistService.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace ChecklistService
 {
@@ -38,6 +40,11 @@ namespace ChecklistService
 
                         var builder = WebApplication.CreateBuilder();
 
+                        builder.Services.AddDbContext<ChecklistDbContext>(options =>
+                            options.UseSqlServer(builder.Configuration.GetConnectionString("ChecklistDbConnection")));
+
+                        builder.Services.AddScoped<IChecklistRepository, ChecklistRepository>();
+
                         builder.Services.AddSingleton<StatelessServiceContext>(serviceContext);
                         builder.WebHost
                                     .UseKestrel()
@@ -53,6 +60,8 @@ namespace ChecklistService
                         app.UseSwagger();
                         app.UseSwaggerUI();
                         }
+
+                        app.UseRouting();
                         app.UseAuthorization();
                         app.MapControllers();
                         

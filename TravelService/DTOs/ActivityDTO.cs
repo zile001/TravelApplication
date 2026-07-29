@@ -11,6 +11,6 @@ namespace TravelService.DTOs
         public string Location { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public decimal EstimatedCost { get; set; }
-        public ActivityStatus Status { get; set; }
+        public string Status { get; set; } = string.Empty;
     }
 }

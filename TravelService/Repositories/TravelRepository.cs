@@ -18,7 +18,7 @@ namespace TravelService.Repositories
         //Pomocna metoda za dobijanje ili kreiranje recnika
         private async Task<IReliableDictionary<Guid, TravelPlan>> GetDictionaryAsync()
         {
-            return await _stateManager.GetOrAddAsync<IReliableDictionary<Guid,TravelPlan>>(DictionaryName);
+            return await _stateManager.GetOrAddAsync<IReliableDictionary<Guid, TravelPlan>>(DictionaryName);
         }
 
         public async Task<TravelPlan> CreatePlanAsync(TravelPlan plan)
@@ -55,7 +55,7 @@ namespace TravelService.Repositories
                 {
                     while (await enumerator.MoveNextAsync(default))
                     {
-                        if(enumerator.Current.Value.UserId == userId)
+                        if (enumerator.Current.Value.UserId == userId)
                         {
                             plansList.Add(enumerator.Current.Value);
                         }
@@ -87,6 +87,35 @@ namespace TravelService.Repositories
             }
         }
 
+        public async Task<IEnumerable<Destination>> GetDestinationsByPlanIdAsync(Guid planId)
+        {
+            var plan = await GetPlanByIdAsync(planId);
+            if (plan == null || plan.Destinations == null) return Enumerable.Empty<Destination>();
+
+            return plan.Destinations.OrderBy(d => d.ArrivalDate);
+        }
+
+        public async Task<Destination?> GetDestinationByIdAsync(Guid planId, Guid destinationId)
+        {
+            var plan = await GetPlanByIdAsync(planId);
+            if (plan == null || plan.Destinations == null) return null;
+
+            return plan.Destinations.FirstOrDefault(d => d.Id == destinationId);
+        }
+
+        public async Task<bool> UpdateDestinationAsync(Guid planId, Destination destination)
+        {
+            var plan = await GetPlanByIdAsync(planId);
+            if (plan == null || plan.Destinations == null) return false;
+
+            var index = plan.Destinations.FindIndex(d => d.Id == destination.Id);
+            if (index == -1) return false;
+
+            plan.Destinations[index] = destination;
+            await UpdatePlanAsync(plan);
+            return true;
+        }
+
         public async Task<bool> AddDestinationAsync(Guid planId, Destination destination)
         {
             var plan = await GetPlanByIdAsync(planId);
@@ -103,11 +132,30 @@ namespace TravelService.Repositories
             if (plan == null) return false;
 
             var destination = plan.Destinations.FirstOrDefault(d => d.Id == destinationId);
-            if(destination == null) return false;
+            if (destination == null) return false;
 
             plan.Destinations.Remove(destination);
             await UpdatePlanAsync(plan);
             return true;
+        }
+    
+
+        public async Task<IEnumerable<Activity>> GetActivitiesByPlanIdAsync(Guid travelPlanId)
+        {
+            var plan = await GetPlanByIdAsync(travelPlanId);
+            if (plan == null || plan.Activities == null)
+                return Enumerable.Empty<Activity>();
+            return plan.Activities
+                .OrderBy(a => a.Date)
+                .ThenBy(a => a.Time);
+        }
+
+        public async Task<Activity?> GetActivityByIdAsync(Guid planId,Guid id)
+        {
+            var plan = await GetPlanByIdAsync(planId);
+            if(plan == null || plan.Activities == null) return null;
+
+            return plan.Activities.FirstOrDefault(a => a.Id == id);
         }
 
         public async Task<bool> AddActivityAsync(Guid planId, Activity activity)
@@ -115,35 +163,39 @@ namespace TravelService.Repositories
             var plan = await GetPlanByIdAsync(planId);
             if (plan == null) return false;
 
+            plan.Activities ??= new List<Activity>();
             plan.Activities.Add(activity);
+
             await UpdatePlanAsync(plan);
             return true;
         }
 
-        public async Task<bool> UpdateActivityStatusAsync(Guid planId, Guid activityId, ActivityStatus status)
+        public async Task<bool> UpdateActivityAsync(Guid planId, Activity activity)
         {
             var plan = await GetPlanByIdAsync(planId);
-            if (plan == null) return false;
+            if (plan == null || plan.Activities == null) return false;
 
-            var activity = plan.Activities.FirstOrDefault(a => a.Id == activityId);
-            if(activity == null) return false;
+            var index = plan.Activities.FindIndex(a => a.Id == activity.Id);
+            if (index == -1) return false;
 
-            activity.Status = status;
+            plan.Activities[index] = activity;
             await UpdatePlanAsync(plan);
             return true;
         }
 
-        public async Task<bool> DeleteActivityAsync(Guid planId, Guid activityId)
+        public async Task<bool> DeleteActivityAsync(Guid planId, Guid id)
         {
             var plan = await GetPlanByIdAsync(planId);
-            if (plan == null) return false;
+            if (plan == null || plan.Activities == null) return false;
 
-            var activity = plan.Activities.FirstOrDefault(a => a.Id == activityId);
+            var activity = plan.Activities.FirstOrDefault(a => a.Id == id);
             if (activity == null) return false;
 
             plan.Activities.Remove(activity);
             await UpdatePlanAsync(plan);
             return true;
         }
+
+        
     }
 }

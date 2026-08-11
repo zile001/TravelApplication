@@ -13,6 +13,9 @@ using Microsoft.ServiceFabric.Services.Runtime;
 using Microsoft.ServiceFabric.Data;
 using ChecklistService.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace ChecklistService
 {
@@ -54,6 +57,28 @@ namespace ChecklistService
                         builder.Services.AddControllers();
                         builder.Services.AddEndpointsApiExplorer();
                         builder.Services.AddSwaggerGen();
+
+                         var jwtSecret = builder.Configuration["Jwt:Secret"]
+                         ?? builder.Configuration["JwtSettings:Secret"]
+                         ?? "OvoJeMojSuperTajniKljucKojiMoraBitiDovoljnoDugacak123!";
+                        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                            .AddJwtBearer(options =>
+                            {
+                                options.TokenValidationParameters = new TokenValidationParameters
+                                {
+                                    ValidateIssuerSigningKey = true,
+                                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+                                    ValidateIssuer = false,
+                                    ValidateAudience = false,
+                                    ValidateLifetime = true,
+                                    ClockSkew = TimeSpan.Zero,
+
+                                    NameClaimType = "nameid",
+                                    RoleClaimType = "role"
+                                };
+                            });
+
+
                         var app = builder.Build();
                         if (app.Environment.IsDevelopment())
                         {
@@ -62,6 +87,7 @@ namespace ChecklistService
                         }
 
                         app.UseRouting();
+                        app.UseAuthentication();
                         app.UseAuthorization();
                         app.MapControllers();
                         

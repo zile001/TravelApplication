@@ -1,10 +1,8 @@
 import React from "react";
 
-const DestinationButton = ({ planId, destinationsCount, onClick }) => {
+const DestinationButton = ({ planId, count, onClick }) => {
   return (
-    <button onClick={() => onClick(planId)}>
-      Destinacije ({destinationsCount || 0})
-    </button>
+    <button onClick={() => onClick(planId)}>Destinacije ({count || 0})</button>
   );
 };
 

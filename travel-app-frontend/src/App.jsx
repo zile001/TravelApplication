@@ -7,6 +7,8 @@ import { RegisterPage } from "./pages/RegisterPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { PlanDetailsPage } from "./pages/PlanDetailsPage";
 import { DestinationPage } from "./pages/DestinationPage";
+import { ActivityPage } from "./pages/ActivityPage";
+import { ChecklistPage } from "./pages/ChecklistPage";
 function App() {
   return (
     <BrowserRouter>
@@ -24,7 +26,9 @@ function App() {
         />
         <Route path="/plans/:id" element={<PlanDetailsPage />} />
         <Route path="/plans/:id/destinations" element={<DestinationPage />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/plans/:id/activities" element={<ActivityPage />} />
+        <Route path="/plans/:id/checklist" element={<ChecklistPage />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );

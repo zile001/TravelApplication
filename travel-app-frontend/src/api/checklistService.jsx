@@ -3,7 +3,7 @@ import api from "./axios";
 export const checklistService = {
   addItem: async (itemData) => {
     const response = await api.post("/checklist/items", itemData);
-    return esponse.data;
+    return response.data;
   },
 
   getItemById: async (id) => {

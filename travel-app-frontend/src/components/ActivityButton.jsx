@@ -1,10 +1,8 @@
 import React from "react";
 
-const ActivityButton = ({ planId, activitiesCount, onClick }) => {
+const ActivityButton = ({ planId, count, onClick }) => {
   return (
-    <button onClick={() => onClick(planId)}>
-      Aktivnosti ({activitiesCount || 0})
-    </button>
+    <button onClick={() => onClick(planId)}>Aktivnosti ({count || 0})</button>
   );
 };
 

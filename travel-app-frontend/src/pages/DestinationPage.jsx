@@ -29,7 +29,7 @@ export const DestinationPage = () => {
     try {
       setLoading(true);
       setError("");
-      const data = await travelService.getDestinationsByPlanId(id);
+      const data = await travelService.getDestinations(id);
       setDestinations(data || []);
     } catch (err) {
       console.error("Greska pri ucitavanju destinacija:", err);
@@ -45,13 +45,28 @@ export const DestinationPage = () => {
   };
 
   const handleCreateDestination = async (e) => {
-    //ispraviti ovo
     e.preventDefault();
     try {
       setError("");
-      await travelService.addDestination(id, {
-        ...formData,
-      });
+
+      const destinationData = {
+        name: formData.name,
+        location: formData.location,
+        arrivalDate: formData.arrivalDate || null,
+        departureDate: formData.departureDate || null,
+        notes: formData.notes,
+      };
+
+      const newDestination = await travelService.addDestination(
+        id,
+        destinationData,
+      );
+
+      if (newDestination) {
+        setDestinations((prev) => [...prev, newDestination]);
+      } else {
+        fetchDestinations();
+      }
 
       setFormData({
         name: "",

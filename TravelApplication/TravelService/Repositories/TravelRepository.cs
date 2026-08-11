@@ -118,12 +118,37 @@ namespace TravelService.Repositories
 
         public async Task<bool> AddDestinationAsync(Guid planId, Destination destination)
         {
-            var plan = await GetPlanByIdAsync(planId);
-            if (plan == null) return false;
+            //var plan = await GetPlanByIdAsync(planId);
+            //if (plan == null) return false;
 
-            plan.Destinations.Add(destination);
-            await UpdatePlanAsync(plan);
-            return true;
+            //plan.Destinations.Add(destination);
+            //await UpdatePlanAsync(plan);
+            //return true;
+            var plansDict = await GetDictionaryAsync();
+
+            using (var tx = _stateManager.CreateTransaction())
+            {
+                // 1. Čitamo plan iz rečnika SA zaključavanjem za azuriranje (Update lock)
+                var result = await plansDict.TryGetValueAsync(tx, planId, LockMode.Update);
+                if (!result.HasValue)
+                {
+                    return false; // Plan ne postoji
+                }
+
+                var plan = result.Value;
+
+                // 2. Osiguravamo da lista postoji i dodajemo novu destinaciju
+                plan.Destinations ??= new List<Destination>();
+                plan.Destinations.Add(destination);
+
+                // 3. EKSPLICITNO upisujemo osveženi objekat nazad u rečnik pod istim ključem!
+                // Bez ovoga, Service Fabric NE ZNA da se lista unutar objekta promenila!
+                await plansDict.SetAsync(tx, planId, plan);
+
+                // 4. Trajno potvrdjujemo transakciju (zapis na disk i replike)
+                await tx.CommitAsync();
+                return true;
+            }
         }
 
         public async Task<bool> DeleteDestinationAsync(Guid planId, Guid destinationId)
@@ -160,14 +185,30 @@ namespace TravelService.Repositories
 
         public async Task<bool> AddActivityAsync(Guid planId, Activity activity)
         {
-            var plan = await GetPlanByIdAsync(planId);
-            if (plan == null) return false;
+            var plansDict = await GetDictionaryAsync();
 
-            plan.Activities ??= new List<Activity>();
-            plan.Activities.Add(activity);
+            using (var tx = _stateManager.CreateTransaction())
+            {
+                // 1. Čitamo plan iz rečnika SA zaključavanjem za ažuriranje (Update lock)
+                var result = await plansDict.TryGetValueAsync(tx, planId, LockMode.Update);
+                if (!result.HasValue)
+                {
+                    return false; // Plan ne postoji
+                }
 
-            await UpdatePlanAsync(plan);
-            return true;
+                var plan = result.Value;
+
+                // 2. Osiguravamo da lista aktivnosti postoji i dodajemo novu aktivnost
+                plan.Activities ??= new List<Activity>();
+                plan.Activities.Add(activity);
+
+                // 3. Eksplicitno upisujemo osveženi objekat nazad u rečnik
+                await plansDict.SetAsync(tx, planId, plan);
+
+                // 4. Trajno potvrđujemo transakciju (zapis na disk i replike)
+                await tx.CommitAsync();
+                return true;
+            }
         }
 
         public async Task<bool> UpdateActivityAsync(Guid planId, Activity activity)

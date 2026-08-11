@@ -56,7 +56,7 @@ namespace TravelService
                         builder.Services.AddEndpointsApiExplorer();
                         builder.Services.AddSwaggerGen();
 
-                        //var jwtSecret = builder.Configuration["Jwt:Secret"]; // Proveri putanju u appsettings.json
+                        
                         var jwtSecret = builder.Configuration["Jwt:Secret"]
                          ?? builder.Configuration["JwtSettings:Secret"]
                          ?? "OvoJeMojSuperTajniKljucKojiMoraBitiDovoljnoDugacak123!";

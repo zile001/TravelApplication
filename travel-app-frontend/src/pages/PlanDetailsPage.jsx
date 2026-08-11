@@ -36,6 +36,10 @@ export const PlanDetailsPage = () => {
   if (error) return <div>{error}</div>;
   if (!plan) return <div>Plan nije pronađen.</div>;
 
+  console.log("Trenutni plan u renderu:", plan);
+  console.log("Destinations niz:", plan?.destinations);
+  console.log("Broj destinacija:", plan?.destinations?.length);
+
   return (
     <div>
       <button onClick={() => navigate("/dashboard")}>Nazad na planove</button>
@@ -72,6 +76,9 @@ export const PlanDetailsPage = () => {
           count={plan.activities?.length}
           onClick={() => navigate(`/plans/${id}/activities`)}
         />
+        <button onClick={() => navigate(`/plans/${plan.id}/checklist`)}>
+          Ček-lista za pakovanje
+        </button>
       </div>
     </div>
   );

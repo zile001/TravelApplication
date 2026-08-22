@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { travelService } from "../api/travelService";
 import DestinationButton from "../components/DestinationButton";
 import ActivityButton from "../components/ActivityButton";
+import "../styles/DashboardPage.css";
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
@@ -81,13 +82,21 @@ export const DashboardPage = () => {
     }
   };
 
+  const handleEditPlan = (planId, e) => {
+    e.stopPropagation();
+    navigate(`/plans/${planId}/edit`);
+  };
+
   if (loading) return <div>Učitavanje planova...</div>;
 
   return (
-    <div>
-      <div>
+    <div className="dashboard-container">
+      <div className="dashboard-header">
         <h2>Moji planovi putovanja</h2>
-        <button onClick={() => setShowForm(!showForm)}>
+        <button
+          className="btn-toggle-form"
+          onClick={() => setShowForm(!showForm)}
+        >
           {showForm ? "Zatvori formu" : "+ Novo putovanje"}
         </button>
       </div>
@@ -95,10 +104,10 @@ export const DashboardPage = () => {
       {error && <div>{error}</div>}
 
       {showForm && (
-        <form onSubmit={handleCreatePlan}>
+        <form onSubmit={handleCreatePlan} className="plan-form">
           <h3>Kreiraj novo putovanje</h3>
 
-          <div>
+          <div className="form-group">
             <label>Naziv putovanja:</label>
             <input
               type="text"
@@ -108,7 +117,7 @@ export const DashboardPage = () => {
               required
             />
           </div>
-          <div>
+          <div className="form-group">
             <label>Opis:</label>
             <input
               type="text"
@@ -117,8 +126,8 @@ export const DashboardPage = () => {
               onChange={handleChange}
             />
           </div>
-          <div>
-            <div>
+          <div className="form-row">
+            <div className="form-group">
               <label>Datum početka:</label>
               <input
                 type="date"
@@ -128,7 +137,7 @@ export const DashboardPage = () => {
                 required
               />
             </div>
-            <div>
+            <div className="form-group">
               <label>Datum završetka:</label>
               <input
                 type="date"
@@ -139,7 +148,7 @@ export const DashboardPage = () => {
               />
             </div>
           </div>
-          <div>
+          <div className="form-group">
             <label>Budžet (€):</label>
             <input
               type="number"
@@ -149,7 +158,7 @@ export const DashboardPage = () => {
             />
           </div>
 
-          <div>
+          <div className="form-group">
             <label>Napomene:</label>
             <textarea
               name="generalNotes"
@@ -159,32 +168,51 @@ export const DashboardPage = () => {
             />
           </div>
 
-          <button type="submit">Sačuvaj Plan</button>
+          <button type="submit" className="btn-submit">
+            Sačuvaj Plan
+          </button>
         </form>
       )}
 
       <div>
         {plans.length === 0 ? (
-          <p>Trenutno nemate kreiranih planova putovanja</p>
+          <p className="no-plans-text">
+            Trenutno nemate kreiranih planova putovanja
+          </p>
         ) : (
-          plans.map((plan) => (
-            <div key={plan.id} onClick={() => navigate(`/plans/${plan.id}`)}>
-              <div>
-                <h3>{plan.title}</h3>
-                <p>{plan.description}</p>
-                <div>
-                  {new Date(plan.startDate).toLocaleDateString()} -{" "}
-                  {new Date(plan.endDate).toLocaleDateString()}
+          <div className="plans-grid">
+            {plans.map((plan) => (
+              <div
+                key={plan.id}
+                className="plan-card"
+                onClick={() => navigate(`/plans/${plan.id}`)}
+              >
+                <div className="plan-card-body">
+                  <h3>{plan.title}</h3>
+                  <p>{plan.description}</p>
+                  <div className="plan-date">
+                    {new Date(plan.startDate).toLocaleDateString()} -{" "}
+                    {new Date(plan.endDate).toLocaleDateString()}
+                  </div>
+                  <div className="plan-budget">{plan.budget}</div>
                 </div>
-                <div>{plan.budget}</div>
+                <div className="plan-card-actions">
+                  <button
+                    className="btn-edit"
+                    onClick={(e) => handleEditPlan(plan.id, e)}
+                  >
+                    Izmeni
+                  </button>
+                  <button
+                    className="btn-delete"
+                    onClick={(e) => handleDeletePlan(plan.id, e)}
+                  >
+                    Obriši
+                  </button>
+                </div>
               </div>
-              <div>
-                <button onClick={(e) => handleDeletePlan(plan.id, e)}>
-                  Obriši
-                </button>
-              </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
     </div>

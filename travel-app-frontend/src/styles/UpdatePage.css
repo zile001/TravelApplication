@@ -1,0 +1,140 @@
+.update-page-container {
+  max-width: 650px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #3d2b1f;
+}
+
+.btn-back {
+  background: none;
+  border: 1px solid #c9b097;
+  color: #5c4033;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 20px;
+  transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+  background-color: #ebdccb;
+  color: #3d2b1f;
+}
+
+.update-card {
+  background-color: #faf6f0;
+  border: 1px solid #ebdccb;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 4px 12px rgba(61, 43, 31, 0.05);
+}
+
+.update-card h2 {
+  color: #4a3525;
+  font-size: 1.6rem;
+  margin-top: 0;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e8dec8;
+  padding-bottom: 12px;
+}
+
+.update-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #5c4033;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 10px 12px;
+  border: 1px solid #ebdccb;
+  border-radius: 8px;
+  background-color: #fffdfa;
+  color: #3d2b1f;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #8c6239;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.btn-cancel {
+  background-color: transparent;
+  border: 1px solid #c9b097;
+  color: #5c4033;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+  background-color: #ebdccb;
+}
+
+.btn-submit {
+  background-color: #8c6239;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-submit:hover {
+  background-color: #6d4c2b;
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-edit {
+  background-color: #8c6239;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-edit:hover {
+  background-color: #6d4c2b;
+}

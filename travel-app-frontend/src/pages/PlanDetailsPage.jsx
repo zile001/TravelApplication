@@ -3,7 +3,8 @@ import { useParams, useNavigate, useAsyncError } from "react-router-dom";
 import { travelService } from "../api/travelService";
 import DestinationButton from "../components/DestinationButton";
 import ActivityButton from "../components/ActivityButton";
-
+import FinanceButton from "../components/FinanceButton";
+import "../styles/PlanDetailsPage.css";
 export const PlanDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -32,53 +33,73 @@ export const PlanDetailsPage = () => {
     }
   };
 
-  if (loading) return <div>Učitavanje detalja plana...</div>;
-  if (error) return <div>{error}</div>;
-  if (!plan) return <div>Plan nije pronađen.</div>;
-
-  console.log("Trenutni plan u renderu:", plan);
-  console.log("Destinations niz:", plan?.destinations);
-  console.log("Broj destinacija:", plan?.destinations?.length);
+  if (loading)
+    return <div className="loading-state">Učitavanje detalja plana...</div>;
+  if (error) return <div className="error-message">{error}</div>;
+  if (!plan) return <div className="loading-state">Plan nije pronađen.</div>;
 
   return (
-    <div>
-      <button onClick={() => navigate("/dashboard")}>Nazad na planove</button>
+    <div className="plan-details-container">
+      <button className="btn-back" onClick={() => navigate("/dashboard")}>
+        Nazad na planove
+      </button>
+      <div className="plan-card">
+        <h2 className="plan-title">{plan.title}</h2>
 
-      <h2>{plan.title}</h2>
-      <p>
-        <strong>Opis:</strong> {plan.description}
-      </p>
-      <p>
-        <strong>Period:</strong> {new Date(plan.startDate).toLocaleDateString()}{" "}
-        - {new Date(plan.endDate).toLocaleDateString()}
-      </p>
-      <p>
-        <strong>Budžet:</strong> {plan.budget} €
-      </p>
-      {plan.generalNotes && (
-        <p>
-          <strong>Napomene:</strong> {plan.generalNotes}
-        </p>
-      )}
+        <div className="plan-info-grid">
+          <div className="info-item">
+            <span className="info-label">Period</span>
+            <span className="info-value">
+              {new Date(plan.startDate).toLocaleDateString()} -{" "}
+              {new Date(plan.endDate).toLocaleDateString()}
+            </span>
+          </div>
 
-      <hr />
+          <div className="info-item">
+            <span className="info-label">Budžet</span>
+            <span className="info-value">{plan.budget} €</span>
+          </div>
+        </div>
 
-      {/* Dugmad za Destinacije i Aktivnosti na dnu detalja */}
-      <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
-        <DestinationButton
-          planId={plan.id}
-          count={plan.destinations?.length}
-          onClick={() => navigate(`/plans/${id}/destinations`)}
-        />
+        {plan.description && (
+          <div className="plan-description">
+            <strong>Opis:</strong>
+            <p>{plan.description}</p>
+          </div>
+        )}
 
-        <ActivityButton
-          planId={plan.id}
-          count={plan.activities?.length}
-          onClick={() => navigate(`/plans/${id}/activities`)}
-        />
-        <button onClick={() => navigate(`/plans/${plan.id}/checklist`)}>
-          Ček-lista za pakovanje
-        </button>
+        {plan.generalNotes && (
+          <div className="plan-notes">
+            <strong>Napomene:</strong>
+            <p>{plan.generalNotes}</p>
+          </div>
+        )}
+
+        <div className="action-buttons-grid">
+          <DestinationButton
+            planId={plan.id}
+            count={plan.destinations?.length}
+            onClick={() => navigate(`/plans/${id}/destinations`)}
+          />
+
+          <ActivityButton
+            planId={plan.id}
+            count={plan.activities?.length}
+            onClick={() => navigate(`/plans/${id}/activities`)}
+          />
+
+          <FinanceButton
+            planId={plan.id}
+            onClick={() => navigate(`/plans/${id}/finance`)}
+          />
+
+          <button
+            className="btn-action"
+            onClick={() => navigate(`/plans/${plan.id}/checklist`)}
+          >
+            Ček-lista za pakovanje
+          </button>
+        </div>
       </div>
     </div>
   );

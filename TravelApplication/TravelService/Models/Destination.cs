@@ -8,6 +8,8 @@ namespace TravelService.Models
         [DataMember]
         public Guid Id { get; set; }
         [DataMember]
+        public Guid TravelPlanId { get; set; }
+        [DataMember]
         public string Name { get; set; } = string.Empty;
         [DataMember]
         public string Location { get; set; } = string.Empty;

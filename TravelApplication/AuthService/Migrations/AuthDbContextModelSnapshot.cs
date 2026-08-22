@@ -47,6 +47,16 @@ namespace AuthService.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Email = "admin@gmail.com",
+                            PasswordHash = "$2a$11$rZdf/58.appM79PhlUacOOTX9Et30jzkcYF0xXloTOE.JVTvLlB/C",
+                            Role = 1,
+                            Username = "admin"
+                        });
                 });
 #pragma warning restore 612, 618
         }

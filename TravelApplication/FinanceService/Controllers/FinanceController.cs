@@ -41,15 +41,16 @@ namespace FinanceService.Controllers
                 UserId = userId,
                 Title = dto.Title,
                 Amount = dto.Amount,
-                Currency = string.IsNullOrWhiteSpace(dto.Currency) ? "EUR" : dto.Currency,
                 Category = dto.Category,
-                Date = dto.Date
+                Date = dto.Date,
+                Description = dto.Description,
             };
 
             await _financeRepository.AddExpenseAsync(newExpense);
 
             var resultDto = MapToDto(newExpense);
-            return CreatedAtAction(nameof(GetExpenseById), new { id = resultDto.Id });
+            //return CreatedAtAction(nameof(GetExpenseById), new { id = resultDto.Id });
+            return Ok(resultDto);
 
         }
 
@@ -69,6 +70,14 @@ namespace FinanceService.Controllers
             if (!uspesno) return NotFound(new { Message = "Trosak ne postoji" });
 
             return Ok(new { Message = "Trosak uspesno obrisan" });
+        }
+
+        [HttpGet("plans/{travelPlanId}/expenses")]
+        public async Task<IActionResult> GetExpensesByPlanId(Guid travelPlanId)
+        {
+            var expenses = await _financeRepository.GetAllExpensesByPlanIdAsync(travelPlanId);
+            var dtos = expenses.Select(MapToDto);
+            return Ok(dtos);
         }
 
         [HttpGet("plans/{travelPlanId}/summary")]
@@ -103,9 +112,9 @@ namespace FinanceService.Controllers
                 TravelPlanId = expense.TravelPlanId,
                 Title = expense.Title,
                 Amount = expense.Amount,
-                Currency = expense.Currency,
                 Category = expense.Category,
-                Date = expense.Date
+                Date = expense.Date,
+                Description = expense.Description,
             };
         }
     }

@@ -15,51 +15,56 @@ using TravelService.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-
+using TravelService;
+using Microsoft.EntityFrameworkCore;
 namespace TravelService
 {
-    /// <summary>
-    /// The FabricRuntime creates an instance of this class for each service type instance.
-    /// </summary>
     internal sealed class TravelService : StatefulService
     {
         public TravelService(StatefulServiceContext context)
             : base(context)
         { }
 
-        /// <summary>
-        /// Optional override to create listeners (like tcp, http) for this service instance.
-        /// </summary>
-        /// <returns>The collection of listeners.</returns>
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {
             return new ServiceReplicaListener[]
             {
                 new ServiceReplicaListener(serviceContext =>
-                    new KestrelCommunicationListener(serviceContext,"ServiceEndpoint", (url, listener) =>
+                    new KestrelCommunicationListener(serviceContext, "ServiceEndpoint", (url, listener) =>
                     {
                         ServiceEventSource.Current.ServiceMessage(serviceContext, $"Starting Kestrel on {url}");
 
                         var builder = WebApplication.CreateBuilder();
 
-                        builder.Services
-                                    .AddSingleton<StatefulServiceContext>(serviceContext)
-                                    .AddSingleton<IReliableStateManager>(this.StateManager)
-                                    .AddScoped<ITravelRepository,TravelRepository>();
+                        // 1. Service Fabric Kontekst
+                        builder.Services.AddSingleton<StatefulServiceContext>(serviceContext);
 
+                        // 2. Registracija SQL Server Baze (TravelDbContext)
+                        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                            ?? "Server=(localdb)\\mssqllocaldb;Database=TravelServiceDb;Trusted_Connection=True;MultipleActiveResultSets=true;";
+
+                        builder.Services.AddDbContext<TravelDbContext>(options =>
+                            options.UseSqlServer(connectionString));
+
+                        // 3. Registracija Repozitorijuma koji sada koristi DbContext
+                        builder.Services.AddScoped<ITravelRepository, TravelRepository>();
+
+                        // 4. Kestrel & Service Fabric Integracija
                         builder.WebHost
-                                    .UseKestrel()
-                                    .UseContentRoot(Directory.GetCurrentDirectory())
-                                    .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.None)
-                                    .UseUrls(url);
+                            .UseKestrel()
+                            .UseContentRoot(Directory.GetCurrentDirectory())
+                            .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.None)
+                            .UseUrls(url);
+
                         builder.Services.AddControllers();
                         builder.Services.AddEndpointsApiExplorer();
                         builder.Services.AddSwaggerGen();
 
-                        
+                        // 5. JWT Autentifikacija
                         var jwtSecret = builder.Configuration["Jwt:Secret"]
-                         ?? builder.Configuration["JwtSettings:Secret"]
-                         ?? "OvoJeMojSuperTajniKljucKojiMoraBitiDovoljnoDugacak123!";
+                            ?? builder.Configuration["JwtSettings:Secret"]
+                            ?? "OvoJeMojSuperTajniKljucKojiMoraBitiDovoljnoDugacak123!";
+
                         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                             .AddJwtBearer(options =>
                             {
@@ -71,25 +76,24 @@ namespace TravelService
                                     ValidateAudience = false,
                                     ValidateLifetime = true,
                                     ClockSkew = TimeSpan.Zero,
-
                                     NameClaimType = "nameid",
                                     RoleClaimType = "role"
                                 };
                             });
 
-
                         var app = builder.Build();
+
                         if (app.Environment.IsDevelopment())
                         {
-                        app.UseSwagger();
-                        app.UseSwaggerUI();
+                            app.UseSwagger();
+                            app.UseSwaggerUI();
                         }
+
                         app.UseAuthentication();
                         app.UseAuthorization();
                         app.MapControllers();
-                        
-                        return app;
 
+                        return app;
                     }))
             };
         }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { checklistService } from "../api/checklistService";
+import "../styles/ChecklistPage.css";
 
 export const ChecklistPage = () => {
   const { id } = useParams();
@@ -49,7 +50,7 @@ export const ChecklistPage = () => {
       if (newItem) {
         setItems((prev) => [...prev, newItem]);
       } else {
-        fetchChecklistItems();
+        await fetchChecklistItems();
       }
 
       setNewItemName("");
@@ -91,48 +92,69 @@ export const ChecklistPage = () => {
     }
   };
 
-  if (loading) return <div>Ucitavanje stavki...</div>;
+  const packedCount = items.filter((item) => item.isPacked).length;
+  if (loading) return <div className="loading-state">Ucitavanje stavki...</div>;
 
   return (
-    <div>
-      <button onClick={() => navigate(`/plans/${id}`)}>
+    <div className="checklist-container">
+      <button className="btn-back" onClick={() => navigate(`/plans/${id}`)}>
         Nazad na detalje plana
       </button>
 
-      <h2>Cek lista za pakovanje</h2>
+      <div className="checklist-header">
+        <h2>Ček lista za pakovanje</h2>
+        {items.length > 0 && (
+          <div className="checklist-progress">
+            Spakovano: {packedCount} od {items.length}
+          </div>
+        )}
+      </div>
 
-      {error && <div>{error}</div>}
+      {error && <div className="error-message">{error}</div>}
 
-      <form onSubmit={handleAddItem}>
+      <form onSubmit={handleAddItem} className="checklist-form">
         <input
+          className="checklist-input"
           type="text"
           value={newItemName}
           onChange={(e) => setNewItemName(e.target.value)}
           required
         />
-        <button type="submit">Dodaj na listu</button>
+        <button className="btn-add" type="submit">
+          Dodaj na listu
+        </button>
       </form>
 
-      <div>
+      <div className="checklist-card">
         {items.length === 0 ? (
-          <p>Nema dodatih stvari na ček-listi.</p>
+          <p className="empty-message">Nema dodatih stvari na ček-listi.</p>
         ) : (
-          <ul>
+          <ul className="checklist-items">
             {items.map((item) => (
-              <li key={item.id}>
-                <input
-                  type="checkbox"
-                  checked={item.isPacked || false}
-                  onChange={() => handleTogglePacked(item.id, item.isPacked)}
-                />
-                <span
-                  style={{
-                    textDecoration: item.isPacked ? "line-through" : "none",
-                  }}
+              <li
+                className={`checklist-item ${item.isPacked ? "packed" : ""}`}
+                key={item.id}
+              >
+                <div
+                  className="item-content"
+                  onClick={() => handleTogglePacked(item.id, item.isPacked)}
                 >
-                  {item.title}
-                </span>
-                <button onClick={() => handleDeleteItem(item.id)}>
+                  <input
+                    type="checkbox"
+                    className="checkbox-custom"
+                    checked={item.isPacked || false}
+                    onChange={() => handleTogglePacked(item.id, item.isPacked)}
+                  />
+                  <span
+                    className={`item-title ${item.isPacked ? "packed" : ""}`}
+                  >
+                    {item.title}
+                  </span>
+                </div>
+                <button
+                  className="btn-delete-small"
+                  onClick={() => handleDeleteItem(item.id)}
+                >
                   Obriši
                 </button>
               </li>

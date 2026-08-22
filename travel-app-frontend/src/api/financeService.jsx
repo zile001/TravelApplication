@@ -11,6 +11,11 @@ export const financeService = {
     return response.data;
   },
 
+  getExpensesByPlan: async (travelPlanId) => {
+    const response = await api.get(`/finance/plans/${travelPlanId}/expenses`);
+    return response.data;
+  },
+
   deleteExpense: async (id) => {
     const response = await api.delete(`/finance/expenses/${id}`);
     return response.data;

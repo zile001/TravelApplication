@@ -9,6 +9,10 @@ import { PlanDetailsPage } from "./pages/PlanDetailsPage";
 import { DestinationPage } from "./pages/DestinationPage";
 import { ActivityPage } from "./pages/ActivityPage";
 import { ChecklistPage } from "./pages/ChecklistPage";
+import { FinancePage } from "./pages/FinancePage";
+import { UpdatePage } from "./pages/UpdatePage";
+import { UpdateActivityPage } from "./pages/UpdateActivityPage";
+import { UpdateDestinationPage } from "./pages/UpdateDestinationPage";
 function App() {
   return (
     <BrowserRouter>
@@ -25,9 +29,19 @@ function App() {
           }
         />
         <Route path="/plans/:id" element={<PlanDetailsPage />} />
+        <Route path="/plans/:id/edit" element={<UpdatePage />} />
         <Route path="/plans/:id/destinations" element={<DestinationPage />} />
         <Route path="/plans/:id/activities" element={<ActivityPage />} />
         <Route path="/plans/:id/checklist" element={<ChecklistPage />} />
+        <Route
+          path="/plans/:planId/activities/:activityId"
+          element={<UpdateActivityPage />}
+        />
+        <Route
+          path="/plans/:planId/destinations/:destinationId"
+          element={<UpdateDestinationPage />}
+        />
+        <Route path="/plans/:id/finance" element={<FinancePage />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

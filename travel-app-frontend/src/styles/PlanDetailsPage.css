@@ -1,0 +1,144 @@
+.plan-details-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #3d2b1f;
+}
+
+.btn-back {
+  background: none;
+  border: 1px solid #c9b097;
+  color: #5c4033;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 20px;
+  transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+  background-color: #ebdccb;
+  color: #3d2b1f;
+}
+
+.plan-card {
+  background-color: #faf6f0;
+  border: 1px solid #ebdccb;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 4px 12px rgba(61, 43, 31, 0.05);
+  margin-bottom: 24px;
+}
+
+.plan-title {
+  color: #4a3525;
+  font-size: 2rem;
+  margin-top: 0;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #e8dec8;
+  padding-bottom: 12px;
+}
+
+.plan-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.info-item {
+  background-color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #e8dec8;
+  display: flex;
+  flex-direction: column;
+}
+
+.info-label {
+  font-size: 0.85rem;
+  color: #735d4d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.info-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #3d2b1f;
+}
+
+.plan-description,
+.plan-notes {
+  background-color: #ffffff;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid #e8dec8;
+  margin-bottom: 16px;
+}
+
+.plan-description strong,
+.plan-notes strong {
+  color: #5c4033;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.plan-description p,
+.plan-notes p {
+  margin: 0;
+  line-height: 1.5;
+  color: #3d2b1f;
+}
+
+.action-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn-action {
+  background-color: #8c6239;
+  color: #ffffff;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.btn-action:hover {
+  background-color: #6d4c2b;
+}
+
+.btn-action:active {
+  transform: scale(0.98);
+}
+
+.error-message {
+  background-color: #fce8e8;
+  color: #a84343;
+  border: 1px solid #e0baba;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 40px;
+  color: #735d4d;
+  font-size: 1.1rem;
+}

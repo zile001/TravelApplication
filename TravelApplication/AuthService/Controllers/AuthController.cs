@@ -47,11 +47,12 @@ namespace AuthService.Controllers
             if (exists)
                 return BadRequest("Korisnik sa ovim email-om već postoji.");
 
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
             var newUser = new User
             {
                 Username = dto.Username,
                 Email = dto.Email,
-                PasswordHash = dto.Password,
+                PasswordHash = hashedPassword,
                 Role = UserRole.Putnik
             };
 
@@ -70,7 +71,7 @@ namespace AuthService.Controllers
 
             // Pronalaženje korisnika u bazi
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == dto.Username);
-            if (user == null || user.PasswordHash != dto.Password)
+            if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
             {
                 return BadRequest("Pogrešan username ili lozinka.");
             }
@@ -102,7 +103,9 @@ namespace AuthService.Controllers
                 {
                     new Claim(ClaimTypes.Name, user.Username),
                     new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()) // Pretpostavka da User model ima Id
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // Pretpostavka da User model ima Id
+
+                    new Claim(ClaimTypes.Role, user.Role.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddDays(7), // Token važi 7 dana
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

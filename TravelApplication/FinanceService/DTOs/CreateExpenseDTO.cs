@@ -14,8 +14,8 @@ namespace FinanceService.DTOs
         [Range(0.01, double.MaxValue, ErrorMessage = "Iznos mora biti veci od 0")]
         public decimal Amount { get; set; }
 
-        public string Currency { get; set; } = string.Empty;
         public ExpenseCategory Category { get; set; }
         public DateTime Date {  get; set; } = DateTime.UtcNow;
+        public string Description { get; set; } = string.Empty ;
     }
 }

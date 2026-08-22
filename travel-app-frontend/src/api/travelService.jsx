@@ -15,6 +15,10 @@ export const travelService = {
     const response = await api.post("/travel/plans", planData);
     return response.data;
   },
+  updatePlan: async (id, planData) => {
+    const response = await api.put(`/travel/plans/${id}`, planData);
+    return response.data;
+  },
 
   deletePlan: async (id) => {
     const response = await api.delete(`/travel/plans/${id}`);
@@ -63,7 +67,7 @@ export const travelService = {
   },
 
   updateActivity: async (planId, activityId, activityData) => {
-    const reponse = await api.put(
+    const response = await api.put(
       `/travel/plans/${planId}/activities/${activityId}`,
       activityData,
     );

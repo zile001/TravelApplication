@@ -5,8 +5,9 @@ namespace TravelService.Repositories
     public interface ITravelRepository
     {
         //Upravljanje planovima
+        Task<IEnumerable<TravelPlan>> GetAllPlansAsync();
         Task<TravelPlan> CreatePlanAsync(TravelPlan plan);
-        Task<TravelPlan> GetPlanByIdAsync(Guid id);
+        Task<TravelPlan?> GetPlanByIdAsync(Guid id);
         Task<IEnumerable<TravelPlan>> GetAllPlansByUserIdAsync(int userId);
         Task<TravelPlan> UpdatePlanAsync(TravelPlan plan);
         Task<bool> DeletePlanAsync(Guid id);

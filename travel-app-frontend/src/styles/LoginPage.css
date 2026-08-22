@@ -1,0 +1,117 @@
+.login-container {
+  min-height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-card {
+  background-color: #faf6f0;
+  border: 1px solid #ebdccb;
+  width: 100%;
+  max-width: 420px;
+  padding: 36px 32px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(61, 43, 31, 0.08);
+}
+
+.login-card h2 {
+  color: #4a3525;
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-align: center;
+  border-bottom: 2px solid #e8dec8;
+  padding-bottom: 12px;
+}
+
+.error-message {
+  background-color: #fce8e8;
+  color: #a84343;
+  border: 1px solid #e0baba;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  color: #5c4033;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid #c9b097;
+  border-radius: 8px;
+  background-color: #fffdfa;
+  color: #3d2b1f;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #8c6239;
+  box-shadow: 0 0 0 3px rgba(140, 98, 57, 0.2);
+}
+
+.btn-submit {
+  background-color: #8c6239;
+  color: #ffffff;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 8px;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background-color: #6d4c2b;
+}
+
+.btn-submit:disabled {
+  background-color: #bdaba0;
+  cursor: not-allowed;
+}
+
+.register-prompt {
+  text-align: center;
+  margin-top: 24px;
+  color: #735d4d;
+  font-size: 0.9rem;
+}
+
+.register-prompt a {
+  color: #8c6239;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.register-prompt a:hover {
+  color: #5c4033;
+  text-decoration: underline;
+}

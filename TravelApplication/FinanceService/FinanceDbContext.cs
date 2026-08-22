@@ -20,7 +20,8 @@ namespace FinanceService
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Title).IsRequired().HasMaxLength(150);
                 entity.Property(e => e.Amount).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.Currency).HasMaxLength(5).HasDefaultValue("EUR");
+                entity.Property(e => e.Date);
+                entity.Property(e => e.Description).HasMaxLength(500);
                 entity.Property(e => e.Category).HasConversion<int>(); // Čuva Enum kao int u bazi
             });
         }

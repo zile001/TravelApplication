@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { authService } from "../api/authService";
-
+import "../styles/LoginPage.css";
 export const LoginPage = () => {
   const [formData, setFormData] = useState({
-    email: "",
+    username: "",
     password: "",
   });
 
@@ -43,44 +43,46 @@ export const LoginPage = () => {
   };
 
   return (
-    <div>
-      <h2>Prijava na sistem</h2>
-      {error && <div>{error}</div>}
+    <div className="login-container">
+      <div className="login-card">
+        <h2>Prijava na sistem</h2>
+        {error && <div className="error-message">{error}</div>}
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="username">Korisnicko ime</label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            required
-            placeholder="Unesite username.."
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Lozinka</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            placeholder="Unesite lozinku"
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="form-group">
+            <label htmlFor="username">Korisnicko ime</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+              placeholder="Unesite username.."
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password">Lozinka</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              placeholder="Unesite lozinku"
+            />
+          </div>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Prijavljivanje..." : "Prijavi se"}
-        </button>
-      </form>
+          <button type="submit" className="btn-submit" disabled={loading}>
+            {loading ? "Prijavljivanje..." : "Prijavi se"}
+          </button>
+        </form>
 
-      <p>
-        Nemate nalog? <Link to="/register">Registrujte se ovde</Link>
-      </p>
+        <p className="register-prompt">
+          Nemate nalog? <Link to="/register">Registrujte se ovde</Link>
+        </p>
+      </div>
     </div>
   );
 };

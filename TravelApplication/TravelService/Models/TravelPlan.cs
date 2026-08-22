@@ -6,6 +6,8 @@ namespace TravelService.Models
     [DataContract]
     public class TravelPlan
     {
+        public TravelPlan() { }
+
         [DataMember]
         public Guid Id { get; set; }
         [DataMember]

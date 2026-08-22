@@ -41,6 +41,12 @@ namespace TravelService.Controllers
 
         }
 
+        private bool IsAdmin()
+        {
+            // Proverava da li u claim-ovima stoji rola "Admin"
+            return User.IsInRole("Admin") || User.FindFirst(ClaimTypes.Role)?.Value == "Admin";
+        }
+
         [HttpPost("plans")]
         public async Task<IActionResult> CreatePlan([FromBody] CreateTravelPlanDTO dto)
         {
@@ -75,6 +81,12 @@ namespace TravelService.Controllers
             int userId = GetCurrentUserId();
             if (userId == 0) return Unauthorized();
 
+            if (IsAdmin())
+            {
+                var allPlans = await _travelRepository.GetAllPlansAsync();
+                return Ok(allPlans.Select(MapToPlanDto));
+            }
+
             var plans = await _travelRepository.GetAllPlansByUserIdAsync(userId);
             var plansDtos = plans.Select(MapToPlanDto);
 
@@ -92,6 +104,28 @@ namespace TravelService.Controllers
 
             return Ok(MapToPlanDto(plan));
         }
+
+        [HttpPut("plans/{id}")]
+        public async Task<IActionResult> UpdatePlan(Guid id, [FromBody] CreateTravelPlanDTO dto)
+        {            
+            var existingPlan = await _travelRepository.GetPlanByIdAsync(id);
+            if (existingPlan == null)
+            {
+                return NotFound(new { Message = "Plan nije pronađen." });
+            }
+          
+            existingPlan.Title = dto.Title;
+            existingPlan.Description = dto.Description;
+            existingPlan.StartDate = dto.StartDate;
+            existingPlan.EndDate = dto.EndDate;
+            existingPlan.Budget = dto.Budget;
+            existingPlan.GeneralNotes = dto.GeneralNotes;
+
+            var updatedPlan = await _travelRepository.UpdatePlanAsync(existingPlan);
+
+            return Ok(updatedPlan);
+        }
+
 
         [HttpDelete("plans/{id}")]
         public async Task<IActionResult> DeletePlan(Guid id)
@@ -193,7 +227,16 @@ namespace TravelService.Controllers
         [HttpPut("plans/{planId}/activities/{activityId}")]
         public async Task<IActionResult> UpdateActivity(Guid planId, Guid activityId, [FromBody] CreateActivityDTO dto)
         {
-            Enum.TryParse<ActivityStatus>(dto.Status, true, out var parsedStatus);
+            if (dto == null)
+            {
+                return BadRequest(new { Message = "Podaci za aktivnost nisu validni." });
+            }
+
+            if (!Enum.TryParse<ActivityStatus>(dto.Status, true, out var parsedStatus))
+            {
+                parsedStatus = ActivityStatus.Planirano;
+            }
+
             var activity = new Activity
             {
                 Id = activityId,

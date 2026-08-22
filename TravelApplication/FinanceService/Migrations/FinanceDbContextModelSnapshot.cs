@@ -34,15 +34,13 @@ namespace FinanceService.Migrations
                     b.Property<int>("Category")
                         .HasColumnType("int");
 
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)")
-                        .HasDefaultValue("EUR");
-
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Title")
                         .IsRequired()

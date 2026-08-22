@@ -13,6 +13,9 @@ using Microsoft.ServiceFabric.Services.Runtime;
 using Microsoft.ServiceFabric.Data;
 using FinanceService.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace FinanceService
 {
@@ -53,6 +56,28 @@ namespace FinanceService
                         builder.Services.AddControllers();
                         builder.Services.AddEndpointsApiExplorer();
                         builder.Services.AddSwaggerGen();
+
+                          var jwtSecret = builder.Configuration["Jwt:Secret"]
+                         ?? builder.Configuration["JwtSettings:Secret"]
+                         ?? "OvoJeMojSuperTajniKljucKojiMoraBitiDovoljnoDugacak123!";
+                        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                            .AddJwtBearer(options =>
+                            {
+                                options.TokenValidationParameters = new TokenValidationParameters
+                                {
+                                    ValidateIssuerSigningKey = true,
+                                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+                                    ValidateIssuer = false,
+                                    ValidateAudience = false,
+                                    ValidateLifetime = true,
+                                    ClockSkew = TimeSpan.Zero,
+
+                                    NameClaimType = "nameid",
+                                    RoleClaimType = "role"
+                                };
+                            });
+
+
                         var app = builder.Build();
                         if (app.Environment.IsDevelopment())
                         {
@@ -60,9 +85,10 @@ namespace FinanceService
                         app.UseSwaggerUI();
                         }
                         app.UseRouting();
+                        app.UseAuthentication();
                         app.UseAuthorization();
                         app.MapControllers();
-                        
+
                         return app;
 
                     }))

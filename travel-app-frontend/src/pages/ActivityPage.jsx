@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { travelService } from "../api/travelService";
+import "../styles/ActivityPage.css";
 
 export const ActivityPage = () => {
   const { id } = useParams();
@@ -75,7 +76,7 @@ export const ActivityPage = () => {
       if (newActivity) {
         setActivities((prev) => [...prev, newActivity]);
       } else {
-        fetchActivities();
+        await fetchActivities();
       }
 
       setFormData({
@@ -88,7 +89,6 @@ export const ActivityPage = () => {
         status: "",
       });
       setShowForm(false);
-      fetchActivities();
     } catch (err) {
       console.error("Greska pri dodavanju aktivnosti:", err);
       setError("Neuspesno dodavanje aktivnosti");
@@ -112,121 +112,137 @@ export const ActivityPage = () => {
   if (loading) return <div>Ucitavanje aktivnosti...</div>;
 
   return (
-    <div>
-      <button onClick={() => navigate(`/plans/${id}`)}>
+    <div className="activity-container">
+      <button className="btn-back" onClick={() => navigate(`/plans/${id}`)}>
         ← Nazad na detalje plana
       </button>
 
-      <div>
+      <div className="activity-header">
         <h2>Aktivnosti</h2>
-        <button onClick={() => setShowForm(!showForm)}>
+        <button
+          className="btn-toggle-form"
+          onClick={() => setShowForm(!showForm)}
+        >
           {showForm ? "Zatvori formu" : "+ Nova aktivnost"}
         </button>
       </div>
 
-      {error && <div>{error}</div>}
+      {error && <div className="error-message">{error}</div>}
 
       {showForm && (
-        <form onSubmit={handleCreateActivity}>
-          <h3>Dodaj novu aktivnost</h3>
+        <div className="activity-form-card">
+          <form className="activity-form" onSubmit={handleCreateActivity}>
+            <h3>Dodaj novu aktivnost</h3>
 
-          <div>
-            <label>Naziv aktivnosti:</label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div>
-            <label>Datum:</label>
-            <input
-              type="date"
-              name="date"
-              value={formData.date}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <label>Vreme:</label>
-            <input
-              type="time"
-              name="time"
-              value={formData.time}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <label>Lokacija:</label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <label>Opis:</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows="3"
-            />
-          </div>
-          <div>
-            <label>Ocekivan trosak:</label>
-            <input
-              type="number"
-              name="estimatedCost"
-              value={formData.estimatedCost}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <label>Status:</label>
-            <input
-              type="text"
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-            />
-          </div>
+            <div className="form-group">
+              <label>Naziv aktivnosti:</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Datum:</label>
+                <input
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="form-group">
+                <label>Vreme:</label>
+                <input
+                  type="time"
+                  name="time"
+                  value={formData.time}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <label>Lokacija:</label>
+              <input
+                type="text"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="form-group">
+              <label>Opis:</label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                rows="3"
+              />
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Ocekivan trosak:</label>
+                <input
+                  type="number"
+                  name="estimatedCost"
+                  value={formData.estimatedCost}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="form-group">
+                <label>Status:</label>
+                <input
+                  type="text"
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
 
-          <button type="submit">Sačuvaj aktivnost</button>
-        </form>
+            <button className="btn-save" type="submit">
+              Sačuvaj aktivnost
+            </button>
+          </form>
+        </div>
       )}
 
-      <div>
+      <div className="activities-list">
         {activities.length === 0 ? (
-          <p>Nema dodatih destinacija za ovaj plan.</p>
+          <p className="empty-message">Nema dodatih aktivnosti za ovaj plan.</p>
         ) : (
           activities.map((activ) => (
-            <div
-              key={activ.id}
-              style={{
-                border: "1px solid #ccc",
-                padding: "10px",
-                margin: "10px 0",
-              }}
-            >
+            <div className="activity-card" key={activ.id}>
               <h3>{activ.title}</h3>
               {activ.location && (
-                <p>
+                <p className="activity-info">
                   <strong>Lokacija:</strong> {activ.location}
                 </p>
               )}
               {activ.status && (
-                <p>
+                <p className="activity-info">
                   <strong>Status:</strong> {activ.status}
                 </p>
               )}
-
-              <button onClick={() => handleDeleteActivity(activ.id)}>
-                Obriši
-              </button>
+              <div className="activity-actions">
+                <button
+                  className="btn-edit"
+                  onClick={() =>
+                    navigate(`/plans/${id}/activities/${activ.id}`)
+                  }
+                >
+                  Izmeni
+                </button>
+                <button
+                  className="btn-delete"
+                  onClick={() => handleDeleteActivity(activ.id)}
+                >
+                  Obriši
+                </button>
+              </div>
             </div>
           ))
         )}

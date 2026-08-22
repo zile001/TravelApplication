@@ -22,7 +22,7 @@
     </Service>
     <Service Name="TravelService" ServicePackageActivationMode="ExclusiveProcess">
       <StatefulService ServiceTypeName="TravelServiceType" TargetReplicaSetSize="[TravelService_TargetReplicaSetSize]" MinReplicaSetSize="[TravelService_MinReplicaSetSize]">
-        <UniformInt64Partition PartitionCount="[TravelService_PartitionCount]" LowKey="-9223372036854775808" HighKey="9223372036854775807" />
+        <SingletonPartition />
       </StatefulService>
     </Service>
     <Service Name="ChecklistService" ServicePackageActivationMode="ExclusiveProcess">

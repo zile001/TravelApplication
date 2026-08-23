@@ -5,10 +5,9 @@ import "../styles/Navbar.css";
 
 export const Navbar = () => {
   const navigate = useNavigate();
-  const location = useLocation(); // Sluša promenu URL rute
+  const location = useLocation();
   const [hasToken, setHasToken] = useState(!!localStorage.getItem("token"));
 
-  // Svaki put kada se promeni stranica (npr. preusmeravanje na /login), osvežavamo stanje tokena
   useEffect(() => {
     const currentToken = localStorage.getItem("token");
 
@@ -22,11 +21,10 @@ export const Navbar = () => {
 
   const handleLogout = () => {
     authService.logout();
-    setHasToken(false); // Eksplicitno obaveštavamo React da je token uklonjen
+    setHasToken(false);
     navigate("/login");
   };
 
-  // Ako korisnik nije ulogovan ili je na Login/Register stranici, nemoj prikazivati Navbar
   if (!hasToken) return null;
 
   return (

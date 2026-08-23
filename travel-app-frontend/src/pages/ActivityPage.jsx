@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { travelService } from "../api/travelService";
 import "../styles/ActivityPage.css";
-
+import { financeService } from "../api/financeService";
 export const ActivityPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const [plan, setPlan] = useState(null);
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -24,19 +25,25 @@ export const ActivityPage = () => {
 
   useEffect(() => {
     if (id) {
-      fetchActivities();
+      loadData();
     }
   }, [id]);
 
-  const fetchActivities = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
       setError("");
-      const data = await travelService.getActivities(id);
-      setActivities(data || []);
+
+      const [planData, activitiesData] = await Promise.all([
+        travelService.getPlanById(id),
+        travelService.getActivities(id),
+      ]);
+
+      setPlan(planData);
+      setActivities(activitiesData || []);
     } catch (err) {
-      console.error("Greska pri ucitavanju aktivnosti:", err);
-      setError("Neuspesno ucitavanje aktivnosti");
+      console.error("Greska pri ucitavanju podataka:", err);
+      setError("Neuspesno ucitavanje detalja i aktivnosti");
     } finally {
       setLoading(false);
     }
@@ -45,6 +52,36 @@ export const ActivityPage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const parseLocalDate = (dateStr) => {
+    if (!dateStr) return null;
+    const cleanStr = dateStr.split("T")[0];
+    const [year, month, day] = cleanStr.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  };
+
+  const generateDaysList = () => {
+    if (!plan || !plan.startDate || !plan.endDate) return [];
+
+    const days = [];
+    let current = parseLocalDate(plan.startDate);
+    const end = parseLocalDate(plan.endDate);
+
+    while (current <= end) {
+      const year = current.getFullYear();
+      const month = String(current.getMonth() + 1).padStart(2, "0");
+      const day = String(current.getDate()).padStart(2, "0");
+
+      days.push(`${year}-${month}-${day}`);
+      current.setDate(current.getDate() + 1);
+    }
+    return days;
+  };
+
+  const openFormForDate = (dateString) => {
+    setFormData((prev) => ({ ...prev, date: dateString }));
+    setShowForm(true);
   };
 
   const handleCreateActivity = async (e) => {
@@ -76,7 +113,29 @@ export const ActivityPage = () => {
       if (newActivity) {
         setActivities((prev) => [...prev, newActivity]);
       } else {
-        await fetchActivities();
+        await loadData();
+      }
+
+      if (parsedCost && parsedCost > 0) {
+        try {
+          await financeService.addExpense({
+            travelPlanId: id,
+            title: `Aktivnost: ${formData.title}`,
+            amount: parsedCost,
+            category: 3,
+            date: formData.date
+              ? new Date(formData.date).toISOString()
+              : new Date().toISOString(),
+            description:
+              formData.description ||
+              `Automatski kreiran trosak za aktivnost: ${formData.title}`,
+          });
+        } catch (finErr) {
+          console.error(
+            "Aktivnost je kreirana, ali trosak nije zabeležen u finansijama:",
+            finErr,
+          );
+        }
       }
 
       setFormData({
@@ -152,6 +211,8 @@ export const ActivityPage = () => {
                   name="date"
                   value={formData.date}
                   onChange={handleChange}
+                  min={plan?.startDate ? plan.startDate.split("T")[0] : ""}
+                  max={plan?.endDate ? plan.endDate.split("T")[0] : ""}
                 />
               </div>
               <div className="form-group">
@@ -210,42 +271,81 @@ export const ActivityPage = () => {
         </div>
       )}
 
-      <div className="activities-list">
-        {activities.length === 0 ? (
-          <p className="empty-message">Nema dodatih aktivnosti za ovaj plan.</p>
-        ) : (
-          activities.map((activ) => (
-            <div className="activity-card" key={activ.id}>
-              <h3>{activ.title}</h3>
-              {activ.location && (
-                <p className="activity-info">
-                  <strong>Lokacija:</strong> {activ.location}
-                </p>
-              )}
-              {activ.status && (
-                <p className="activity-info">
-                  <strong>Status:</strong> {activ.status}
-                </p>
-              )}
-              <div className="activity-actions">
+      <div className="calendar-timeline">
+        {generateDaysList().map((dayDate, index) => {
+          const dayActivities = activities.filter(
+            (a) => a.date && a.date.split("T")[0] === dayDate,
+          );
+
+          return (
+            <div className="day-card" key={dayDate}>
+              <div className="day-header">
+                <h3>
+                  Dan {index + 1} ({dayDate})
+                </h3>
                 <button
-                  className="btn-edit"
-                  onClick={() =>
-                    navigate(`/plans/${id}/activities/${activ.id}`)
-                  }
+                  type="button"
+                  className="btn-add-day-activity"
+                  onClick={() => openFormForDate(dayDate)}
                 >
-                  Izmeni
-                </button>
-                <button
-                  className="btn-delete"
-                  onClick={() => handleDeleteActivity(activ.id)}
-                >
-                  Obriši
+                  + Dodaj za ovaj dan
                 </button>
               </div>
+
+              <div className="day-activities-list">
+                {dayActivities.length === 0 ? (
+                  <p className="no-activities">Nema planiranih aktivnosti.</p>
+                ) : (
+                  dayActivities.map((activ) => (
+                    <div className="activity-card" key={activ.id}>
+                      <div className="activity-card-header">
+                        {activ.time && (
+                          <span className="activity-time">
+                            {activ.time.substring(0, 5)}
+                          </span>
+                        )}
+                        <h4>{activ.title}</h4>
+                      </div>
+
+                      {activ.location && (
+                        <p className="activity-info">
+                          <strong>Lokacija:</strong> {activ.location}
+                        </p>
+                      )}
+
+                      {activ.description && (
+                        <p className="activity-desc">{activ.description}</p>
+                      )}
+
+                      {activ.status && (
+                        <p className="activity-info">
+                          <strong>Status:</strong> {activ.status}
+                        </p>
+                      )}
+
+                      <div className="activity-actions">
+                        <button
+                          className="btn-edit"
+                          onClick={() =>
+                            navigate(`/plans/${id}/activities/${activ.id}`)
+                          }
+                        >
+                          Izmeni
+                        </button>
+                        <button
+                          className="btn-delete"
+                          onClick={() => handleDeleteActivity(activ.id)}
+                        >
+                          Obriši
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
-          ))
-        )}
+          );
+        })}
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ const CATEGORIES = [
   { value: 0, label: "Prevoz" },
   { value: 1, label: "Smestaj" },
   { value: 2, label: "Hrana" },
-  { value: 3, label: "Ulaznice" },
+  { value: 3, label: "Aktivnosti" },
   { value: 4, label: "Kupovina" },
   { value: 5, label: "Ostalo" },
 ];

@@ -3,6 +3,7 @@ using FinanceService.Models;
 using FinanceService.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
+using System.Numerics;
 using System.Security.Claims;
 
 namespace FinanceService.Controllers
@@ -28,11 +29,17 @@ namespace FinanceService.Controllers
             return int.TryParse(nameIdentifier, out var userId) ? userId : 0;
         }
 
+        private bool IsAdmin()
+        {
+            return User.IsInRole("Admin") || User.FindFirst(ClaimTypes.Role)?.Value == "Admin";
+        }
+
         [HttpPost("expenses")]
         public async Task<IActionResult> AddExpense([FromBody] CreateExpenseDTO dto)
         {
             int userId = GetCurrentUserId();
-            if (userId == 0) return Unauthorized(new { Message = "Nevazeci korisnicki token" });
+            if (userId == 0) return Unauthorized();
+
 
             var newExpense = new Expense
             {
@@ -48,8 +55,7 @@ namespace FinanceService.Controllers
 
             await _financeRepository.AddExpenseAsync(newExpense);
 
-            var resultDto = MapToDto(newExpense);
-            //return CreatedAtAction(nameof(GetExpenseById), new { id = resultDto.Id });
+            var resultDto = MapToDto(newExpense);           
             return Ok(resultDto);
 
         }
@@ -66,8 +72,19 @@ namespace FinanceService.Controllers
         [HttpDelete("expenses/{id}")]
         public async Task<IActionResult> DeleteExpense(Guid id)
         {
+            int userId = GetCurrentUserId();
+            if (userId == 0) return Unauthorized();
+
+            var expense = await _financeRepository.GetExpenseByIdAsync(id);
+            if (expense == null) return NotFound(new { Message = "Trosak ne postoji" });
+          
+            if (!IsAdmin() && expense.UserId != userId)
+            {
+                return Forbid();
+            }
+
             var uspesno = await _financeRepository.DeleteExpenseAsync(id);
-            if (!uspesno) return NotFound(new { Message = "Trosak ne postoji" });
+            if (!uspesno) return NotFound(new { Message = "Greska pri brisanju troska" });
 
             return Ok(new { Message = "Trosak uspesno obrisan" });
         }

@@ -23,7 +23,7 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--bg-main);
+  background-color: var(--text-primary);
   color: var(--text-primary);
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   min-height: 100vh;
@@ -34,7 +34,15 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--bg-main);
+  background-color: transparent;
+
+  background-image:
+    linear-gradient(rgba(30, 20, 10, 0.4), rgba(30, 20, 10, 0.4)),
+    url("./beach.jpg");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 /* Stil za glavne kontejnere stranica */

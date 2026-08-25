@@ -1,10 +1,11 @@
-import React, { useState, useEffect, use } from "react";
-import { useParams, useNavigate, useAsyncError } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { travelService } from "../api/travelService";
 import DestinationButton from "../components/DestinationButton";
 import ActivityButton from "../components/ActivityButton";
 import FinanceButton from "../components/FinanceButton";
 import "../styles/PlanDetailsPage.css";
+import { QRCodeCanvas } from "qrcode.react";
 export const PlanDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -37,6 +38,8 @@ export const PlanDetailsPage = () => {
     return <div className="loading-state">Učitavanje detalja plana...</div>;
   if (error) return <div className="error-message">{error}</div>;
   if (!plan) return <div className="loading-state">Plan nije pronađen.</div>;
+
+  const shareableUrl = `${window.location.origin}/plans/${plan.id}`;
 
   return (
     <div className="plan-details-container">
@@ -99,6 +102,13 @@ export const PlanDetailsPage = () => {
           >
             Ček-lista za pakovanje
           </button>
+        </div>
+        <div className="qr-code-section">
+          <h3>QR kod plana</h3>
+
+          <QRCodeCanvas value={shareableUrl} size={180} level="M" />
+
+          <p>Skeniraj QR kod za otvaranje ovog plana.</p>
         </div>
       </div>
     </div>

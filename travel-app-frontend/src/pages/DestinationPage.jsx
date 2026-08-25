@@ -91,7 +91,7 @@ export const DestinationPage = () => {
       return;
 
     try {
-      await travelService.deleteDestination(destinationId);
+      await travelService.deleteDestination(id, destinationId);
       setDestinations(destinations.filter((d) => d.id !== destinationId));
     } catch (err) {
       alert("Greska pri brisanju destinacije");

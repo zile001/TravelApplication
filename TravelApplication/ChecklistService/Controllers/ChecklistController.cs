@@ -28,6 +28,11 @@ namespace ChecklistService.Controllers
             return int.TryParse(nameIdentifier, out var userId) ? userId : 0;
         }
 
+        private bool IsAdmin()
+        {
+            return User.IsInRole("Admin") || User.FindFirst(ClaimTypes.Role)?.Value == "Admin";
+        }
+
         [HttpPost("items")]
         public async Task<IActionResult> AddItem([FromBody] CreateChecklistItemDTO dto)
         {
@@ -62,8 +67,18 @@ namespace ChecklistService.Controllers
         [HttpPatch("items/{id}/status")]
         public async Task<IActionResult> UpdateItemStatus(Guid id, [FromBody] UpdateChecklistItemStatusDTO dto)
         {
+            int userId = GetCurrentUserId();
+            if (userId == 0) return Unauthorized();
+
+            var item = await _checklistRepository.GetItemByIdAsync(id);
+            if (item == null) return NotFound(new { Message = "Stavka nije pronadjena" });
+
+            if (!IsAdmin() && item.UserId != userId)
+            {
+                return Forbid();
+            }
             var uspesno = await _checklistRepository.UpdateItemStatusAsync(id, dto.IsPacked);
-            if (!uspesno) return NotFound(new { Message = "Stavka nije pronadjena" });
+            if (!uspesno) return NotFound(new { Message = "Greska pri azuriranju stavke" });
 
             return Ok(new { Message = "Status stavke uspesno azuriran" });
         }
@@ -79,8 +94,18 @@ namespace ChecklistService.Controllers
         [HttpDelete("items/{id}")]
         public async Task<IActionResult> DeleteItem(Guid id)
         {
+            int userId = GetCurrentUserId();
+            if (userId == 0) return Unauthorized();
+
+            var item = await _checklistRepository.GetItemByIdAsync(id);
+            if (item == null) return NotFound(new { Message = "Stavka nije pronadjena" });
+
+            if (!IsAdmin() && item.UserId != userId)
+            {
+                return Forbid();
+            }
             var uspesno = await _checklistRepository.DeleteItemAsync(id);
-            if (!uspesno) return NotFound(new { Message = "Stavka nije pronadjena" });
+            if (!uspesno) return NotFound(new { Message = "Greska pri brisanju stavke" });
 
             return Ok(new { Message = "Stavka uspesno obrisana" });
         }

@@ -20,12 +20,7 @@ namespace TravelService.Controllers
         }
 
         private int GetCurrentUserId()
-        {
-            //var nameIdentifier = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            //if (string.IsNullOrEmpty(nameIdentifier) && User.Identity is ClaimsIdentity identity)
-            //{
-            //    nameIdentifier = identity.FindFirst("nameid")?.Value ?? identity.FindFirst("sub")?.Value;
-            //}
+        {          
             var claimValue = User.FindFirst("nameid")?.Value
                    ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                    ?? User.FindFirst("id")?.Value
@@ -43,7 +38,7 @@ namespace TravelService.Controllers
 
         private bool IsAdmin()
         {
-            // Proverava da li u claim-ovima stoji rola "Admin"
+            
             return User.IsInRole("Admin") || User.FindFirst(ClaimTypes.Role)?.Value == "Admin";
         }
 
@@ -100,7 +95,9 @@ namespace TravelService.Controllers
             if (plan == null) return NotFound(new {Message = "Plan putovanja nije pronadjen"});
 
             int userId = GetCurrentUserId();
-            if (plan.UserId != userId) return Forbid();
+            if (userId == 0) return Unauthorized();
+
+            //if (!IsAdmin() && plan.UserId != userId) return Forbid();
 
             return Ok(MapToPlanDto(plan));
         }
@@ -113,7 +110,15 @@ namespace TravelService.Controllers
             {
                 return NotFound(new { Message = "Plan nije pronađen." });
             }
-          
+
+            int userId = GetCurrentUserId();
+            if(userId==0) return Unauthorized();
+
+            if (!IsAdmin() && existingPlan.UserId != userId)
+            {
+                return Forbid();
+            }
+
             existingPlan.Title = dto.Title;
             existingPlan.Description = dto.Description;
             existingPlan.StartDate = dto.StartDate;
@@ -134,7 +139,9 @@ namespace TravelService.Controllers
             if (plan == null) return NotFound(new { Message = "Plan putovanja ne postoji." });
 
             int userId = GetCurrentUserId();
-            if (plan.UserId != userId) return Forbid();
+            if (userId == 0) return Unauthorized();
+
+            if (!IsAdmin() && plan.UserId != userId) return Forbid();
 
             await _travelRepository.DeletePlanAsync(id);
             return Ok(new { Message = "Plan putovanja i svi podaci su obrisani." });
@@ -150,6 +157,13 @@ namespace TravelService.Controllers
         [HttpPost("plans/{planId}/destinations")]
         public async Task<IActionResult> AddDestination(Guid planId, [FromBody] CreateDestinationDTO dto)
         {
+            int userId = GetCurrentUserId();
+            if (userId == 0) return Unauthorized();
+
+            var plan = await _travelRepository.GetPlanByIdAsync(planId);
+            if (plan == null) return NotFound(new { Message = "Plan putovanja nije pronadjen" });
+
+            if (!IsAdmin() && plan.UserId != userId) return Forbid();
             var newDestination = new Destination
             {
                 Id = Guid.NewGuid(),
@@ -160,15 +174,22 @@ namespace TravelService.Controllers
                 Notes = dto.Notes
             };
 
-            var uspesno = await _travelRepository.AddDestinationAsync(planId, newDestination);
-            if (!uspesno) return NotFound(new { Message = "Plan putovanja nije pronađen" });
-
+            await _travelRepository.AddDestinationAsync(planId, newDestination);
             return Ok(newDestination);
         }
 
         [HttpPut("plans/{planId}/destinations/{destinationId}")]
         public async Task<IActionResult> UpdateDestination(Guid planId, Guid destinationId, [FromBody] CreateDestinationDTO dto)
         {
+            int userId = GetCurrentUserId();
+            if (userId == 0) return Unauthorized();
+
+            var plan = await _travelRepository.GetPlanByIdAsync(planId);
+            if (plan == null) return NotFound(new { Message = "Plan putovanja nije pronadjen" });
+
+            if (!IsAdmin() && plan.UserId != userId) return Forbid();
+
+
             var destination = new Destination
             {
                 Id = destinationId,
@@ -180,7 +201,7 @@ namespace TravelService.Controllers
             };
 
             var uspesno = await _travelRepository.UpdateDestinationAsync(planId, destination);
-            if (!uspesno) return NotFound(new { Message = "Plan ili destinacija nisu pronađeni" });
+            if (!uspesno) return NotFound(new { Message = "Destinacija nije pronadjena" });
 
             return Ok(destination);
         }
@@ -188,10 +209,17 @@ namespace TravelService.Controllers
         [HttpDelete("plans/{planId}/destinations/{destinationId}")]
         public async Task<IActionResult> DeleteDestination(Guid planId, Guid destinationId)
         {
-            var uspesno = await _travelRepository.DeleteDestinationAsync(planId, destinationId);
-            if (!uspesno) return NotFound(new { Message = "Plan ili destinacija nisu pronađeni" });
+            int userId = GetCurrentUserId();
+            if (userId == 0) return Unauthorized();
+            var plan = await _travelRepository.GetPlanByIdAsync(planId);
+            if (plan == null) return NotFound(new { Message = "Plan putovanja nije pronadjen" });
 
-            return Ok(new { Message = "Destinacija je uspešno obrisana" });
+            if (!IsAdmin() && plan.UserId != userId) return Forbid();
+
+            var uspesno = await _travelRepository.DeleteDestinationAsync(planId, destinationId);
+            if (!uspesno) return NotFound(new { Message = "Destinacija nije pronadjena" });
+
+            return Ok(new { Message = "Destinacija je uspesno obrisana" });
         }
 
         [HttpGet("plans/{planId}/activities")]
@@ -205,6 +233,13 @@ namespace TravelService.Controllers
         [HttpPost("plans/{planId}/activities")]
         public async Task<IActionResult> AddActivity(Guid planId, [FromBody] CreateActivityDTO dto)
         {
+            int userId = GetCurrentUserId();
+            if (userId == 0) return Unauthorized();
+
+            var plan = await _travelRepository.GetPlanByIdAsync(planId);
+            if (plan == null) return NotFound(new { Message = "Plan putovanja nije pronadjen" });
+
+            if (!IsAdmin() && plan.UserId != userId) return Forbid();
             Enum.TryParse<ActivityStatus>(dto.Status, true, out var parsedStatus);
             var newActivity = new Activity
             {
@@ -218,9 +253,7 @@ namespace TravelService.Controllers
                 Status = parsedStatus
             };
 
-            var uspesno = await _travelRepository.AddActivityAsync(planId, newActivity);
-            if (!uspesno) return NotFound(new { Message = "Plan putovanja nije pronađen" });
-
+            await _travelRepository.AddActivityAsync(planId, newActivity);
             return Ok(MapActivityToDto(newActivity));
         }
 
@@ -231,6 +264,14 @@ namespace TravelService.Controllers
             {
                 return BadRequest(new { Message = "Podaci za aktivnost nisu validni." });
             }
+
+            int userId = GetCurrentUserId();
+            if (userId == 0) return Unauthorized();
+
+            var plan = await _travelRepository.GetPlanByIdAsync(planId);
+            if (plan == null) return NotFound(new { Message = "Plan putovanja nije pronadjen" });
+
+            if (!IsAdmin() && plan.UserId != userId) return Forbid();
 
             if (!Enum.TryParse<ActivityStatus>(dto.Status, true, out var parsedStatus))
             {
@@ -250,7 +291,7 @@ namespace TravelService.Controllers
             };
 
             var uspesno = await _travelRepository.UpdateActivityAsync(planId, activity);
-            if (!uspesno) return NotFound(new { Message = "Plan ili aktivnost nisu pronađeni" });
+            if (!uspesno) return NotFound(new { Message = "Aktivnost nije pronadjena" });
 
             return Ok(MapActivityToDto(activity));
         }
@@ -258,10 +299,17 @@ namespace TravelService.Controllers
         [HttpDelete("plans/{planId}/activities/{activityId}")]
         public async Task<IActionResult> DeleteActivity(Guid planId, Guid activityId)
         {
-            var uspesno = await _travelRepository.DeleteActivityAsync(planId, activityId);
-            if (!uspesno) return NotFound(new { Message = "Plan ili aktivnost nisu pronađeni" });
+            int userId = GetCurrentUserId();
+            if (userId == 0) return Unauthorized();
 
-            return Ok(new { Message = "Aktivnost uspešno obrisana" });
+            var plan = await _travelRepository.GetPlanByIdAsync(planId);
+            if (plan == null) return NotFound(new { Message = "Plan putovanja nije pronadjen" });
+
+            if (!IsAdmin() && plan.UserId != userId) return Forbid();
+            var uspesno = await _travelRepository.DeleteActivityAsync(planId, activityId);
+            if (!uspesno) return NotFound(new { Message = "Aktivnost nije pronadjena" });
+
+            return Ok(new { Message = "Aktivnost uspesno obrisana" });
         }
 
         private static ActivityDTO MapActivityToDto(Activity activity)
